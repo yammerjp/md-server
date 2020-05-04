@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "marked": "^1.0.0"
+  },
+  "bin": {
+    "md-server": "bin/md-server"
+  },
+  "license": "MIT",
+  "name": "md-server",
+  "version": "0.0.1",
+  "description": "Web Server to render markdown",
+  "repository": "https://github.com/basd4g/md-server.git"
+}

@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+'use strict'
+
+const fs = require('fs');
+const path = require('path')
+const http = require('http');
+const marked = require('marked');
+
+const htmlString = md => {
+  return `<!DOCTYPE html><html><head><title></title><meta charset="utf-8"><style type="text/css">
+<!-- img {width: 100%; } --></style></head><body>${marked(md)}</body></html>`
+};
+
+const contentType = (isMarkdown,path) => {
+  if(isMarkdown) {
+    return {"Content-Type": "text/html;charset=utf-8" };
+  }
+  if( /\.jpe?g$/.test(path) ) {
+    return {"Content-Type": "image/jpeg"}
+  }
+  if( /\.png$/.test(path) ) {
+    return {"Content-Type": "image/png"}
+  }
+  if( /\.gif/.test(path) ) {
+    return {"Content-Type": "image/gif"}
+  }
+  console.log("error");
+  return "";
+};
+
+const server = http.createServer((req, res) => {
+  const requestPath = req.url.substring(1);
+  const sourceFilePath = path.join( process.cwd(), requestPath);
+
+  if (!fs.existsSync(sourceFilePath)) {
+    res.writeHead(404, {}).end("Not Found");
+    return;
+  }
+
+  const isMarkdown = /\.md$/.test(requestPath) 
+  const isHtml = /\.html$/.test(requestPath) 
+  const encoding = (isMarkdown || isHtml) ? "utf-8" : "binary";
+
+  fs.readFile(sourceFilePath, encoding, (err, data) => {
+    if(err){
+      res.writeHead(500, {}).end("Internal Error");
+      return;
+    }
+    res.writeHead(200, contentType(isMarkdown, requestPath) );
+    res.end( isMarkdown ? htmlString(data) : data, encoding);
+  });
+});
+
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+  console.log("To view your app, open this link in your browser: http://localhost:" + port);
+});
+
